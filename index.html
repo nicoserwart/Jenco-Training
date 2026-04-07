@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymApp">
+<meta name="theme-color" content="#0a0a0f">
+<title>Training App – Nico & Jenni</title>
+
+<!-- App Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="app-icon.png">
+<link rel="apple-touch-icon" href="app-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface-2: #161622;
+  --card: #171723;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.14);
+  --text: #f0f0ff;
+  --sub: #9494b3;
+  --nico-primary: #1a4dc5;
+  --nico-accent: #3a7dff;
+  --nico-glow: rgba(58,125,255,0.18);
+  --nico-dark: #12285f;
+  --jenni-primary: #4da6c5;
+  --jenni-accent: #7dd4f0;
+  --jenni-glow: rgba(125,212,240,0.18);
+  --jenni-dark: #16495a;
+  --active: var(--nico-accent);
+  --active-glow: var(--nico-glow);
+  --active-dark: var(--nico-dark);
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow-soft: 0 8px 30px rgba(0,0,0,.24);
+}
+
+.jenni-mode {
+  --active: var(--jenni-accent);
+  --active-glow: var(--jenni-glow);
+  --active-dark: var(--jenni-dark);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  background: radial-gradient(circle at top, rgba(58,125,255,0.08), transparent 24%), var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:110px;
+}
+
+button,input{font:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+.safe-bottom{height:env(safe-area-inset-bottom,0px);}
+
+/* ── PLAN SWITCHER ─────────────────────────────── */
+.plan-switcher{
+  display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top,16px) 16px 0;
+  padding-top:max(env(safe-area-inset-top),16px);
+  gap:8px;
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,10,15,0.88);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.plan-btn{
+  flex:1;max-width:180px;
+  padding:14px 12px;
+  border:none;background:transparent;
+  font-weight:700;font-size:13px;
+  color:var(--sub);cursor:pointer;
+  border-radius:14px 14px 0 0;
+  border-bottom:3px solid transparent;
+  transition:all .25s;letter-spacing:.7px;
+  text-transform:uppercase;
+}
+.plan-btn.active-nico{color:var(--nico-accent);border-bottom-color:var(--nico-accent);background:rgba(58,125,255,0.06);}
+.plan-btn.active-jenni{color:var(--jenni-accent);border-bottom-color:var(--jenni-accent);background:rgba(125,212,240,0.06);}
+
+/* ── HEADER ────────────────────────────────────── */
+.app-header{
+  padding:20px 16px 8px;
+  text-align:center;
+}
+.app-header h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(28px,7vw,40px);
+  letter-spacing:2px;
+  color:var(--text);
+  line-height:1;
+}
+.app-header .subtitle{
+  font-size:12px;color:var(--sub);font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;margin-top:6px;
+}
+.accent-line{
+  width:68px;height:3px;
+  background:linear-gradient(90deg,var(--active),transparent);
+  margin:10px auto 0;
+  border-radius:2px;
+  transition:background .3s;
+}
+
+/* ── PHASE TABS ────────────────────────────────── */
+.phase-tabs, .day-tabs{
+  display:flex;overflow-x:auto;gap:8px;
+  padding:12px 16px;
+  scrollbar-width:none;
+}
+.phase-tabs::-webkit-scrollbar,.day-tabs::-webkit-scrollbar{display:none;}
+.phase-tab,.day-tab{
+  flex-shrink:0;
+  padding:10px 16px;border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--sub);
+  font-weight:700;font-size:12px;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.phase-tab.active{
+  background:linear-gradient(180deg,var(--active),color-mix(in srgb, var(--active) 70%, black));
+  border-color:var(--active);
+  color:#fff;
+  box-shadow:0 0 16px var(--active-glow);
+}
+.day-tab.active{
+  background:rgba(255,255,255,0.06);
+  border-color:var(--active);
+  color:var(--active);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+/* ── WEEK SELECTOR ─────────────────────────────── */
+.week-selector{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;padding:8px 16px 4px;
+}
+.week-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;}
+.week-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.week-btn{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--surface);color:var(--sub);
+  font-weight:800;font-size:13px;cursor:pointer;
+  transition:all .2s;
+}
+.week-btn.active{
+  background:var(--active);border-color:var(--active);color:#fff;
+  box-shadow:0 0 14px var(--active-glow);
+}
+
+/* ── SECTION LABEL ─────────────────────────────── */
+.section-label{
+  padding:6px 16px 10px;
+  font-size:10px;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;color:var(--sub);
+}
+
+/* ── PROGRESS BAR ──────────────────────────────── */
+.progress-bar-wrap{padding:4px 16px 12px;}
+.progress-bar-track{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;border:1px solid var(--border);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--active),color-mix(in srgb, var(--active) 70%, white));border-radius:999px;transition:width .4s;}
+.progress-text{font-size:11px;color:var(--sub);text-align:right;margin-top:6px;font-weight:600;}
+
+/* ── PLAN VIEW CONTAINERS ──────────────────────── */
+.plan-view{display:none;}
+.plan-view.active{display:block;}
+
+/* ── EXERCISE CARD ─────────────────────────────── */
+.exercise-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;}
+.ex-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent), var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  overflow:hidden;
+  transition:border-color .2s, transform .2s;
+  box-shadow:var(--shadow-soft);
+}
+.ex-card.logged{border-color:rgba(34,197,94,.55);}
+.ex-header{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:16px 16px 14px;cursor:pointer;
+}
+.ex-index{
+  width:34px;height:34px;border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:var(--sub);flex-shrink:0;
+}
+.ex-title{flex:1;min-width:0;}
+.ex-name{
+  font-weight:800;font-size:15px;color:var(--text);
+  line-height:1.2;
+}
+.ex-meta{font-size:11px;color:var(--sub);margin-top:4px;line-height:1.35;}
+.ex-badge{
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;
+}
+.badge{
+  padding:5px 10px;border-radius:999px;
+  font-size:10px;font-weight:800;letter-spacing:.5px;
+  text-transform:uppercase;white-space:nowrap;
+}
+.badge-weight{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);}
+.badge-pct{background:var(--active-dark);color:var(--active);border:1px solid rgba(255,255,255,0.04);}
+.ex-body{padding:0 16px 16px;display:none;border-top:1px solid rgba(255,255,255,0.05);}
+.ex-body.open{display:block;}
+
+.info-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin:14px 0 12px;
+}
+.info-cell{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;text-align:center;
+}
+.info-val{font-size:16px;font-weight:800;color:var(--text);}
+.info-key{font-size:10px;color:var(--sub);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+
+.notes-badge{
+  font-size:11px;color:var(--warn);
+  background:rgba(245,158,11,0.08);
+  border:1px solid rgba(245,158,11,0.15);
+  border-radius:14px;
+  padding:10px 12px;margin-bottom:12px;
+}
+
+/* ── SET LOGGING ──────────────────────────────── */
+.set-log-list{display:flex;flex-direction:column;gap:10px;}
+.set-row{
+  display:grid;
+  grid-template-columns:52px 1fr 1fr 92px;
+  gap:8px;
+  align-items:end;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px;
+}
+.set-number{
+  height:46px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  font-size:12px;font-weight:800;color:var(--sub);
+}
+.log-input-wrap{min-width:0;}
+.log-input{
+  width:100%;background:#101019;
+  border:1px solid var(--border-strong);
+  border-radius:12px;color:var(--text);
+  font-size:15px;font-weight:700;
+  padding:13px 10px;text-align:center;
+  -webkit-appearance:none;
+}
+.log-input:focus{outline:none;border-color:var(--active);box-shadow:0 0 0 3px var(--active-glow);}
+.log-label{font-size:10px;color:var(--sub);font-weight:800;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-top:4px;}
+.set-save-btn{
+  height:46px;background:var(--active);border:none;border-radius:12px;
+  color:#fff;font-weight:800;font-size:12px;cursor:pointer;
+  letter-spacing:.4px;text-transform:uppercase;
+  box-shadow:0 0 12px var(--active-glow);
+}
+.set-save-btn.saved{background:var(--success);box-shadow:none;}
+
+.exercise-actions{
+  display:flex;gap:8px;margin-top:12px;
+}
+.action-btn{
+  flex:1;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+}
+.action-btn.primary{
+  background:var(--active);
+  border-color:var(--active);
+  box-shadow:0 0 14px var(--active-glow);
+}
+
+/* ── SETTINGS / XRM MODAL ──────────────────────── */
+.settings-btn{
+  position:fixed;bottom:max(env(safe-area-inset-bottom),18px);right:16px;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(180deg,var(--active),color-mix(in srgb, var(--active) 72%, black));
+  border:none;cursor:pointer;
+  font-size:22px;z-index:200;
+  box-shadow:0 8px 30px var(--active-glow);
+  transition:all .25s;
+}
+.settings-btn:active{transform:scale(.94);}
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);
+  z-index:300;display:none;align-items:flex-end;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  width:100%;max-height:90vh;
+  background:var(--surface);
+  border-radius:28px 28px 0 0;
+  border-top:1px solid var(--border);
+  overflow-y:auto;
+  padding:20px 16px max(env(safe-area-inset-bottom),20px);
+}
+.modal-handle{
+  width:46px;height:5px;border-radius:999px;
+  background:var(--border-strong);margin:0 auto 16px;
+}
+.modal-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:2px;
+  color:var(--text);margin-bottom:4px;
+}
+.modal-sub{font-size:12px;color:var(--sub);margin-bottom:18px;line-height:1.45;}
+.xrm-group{margin-bottom:18px;}
+.xrm-group-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--active);margin-bottom:8px;}
+.xrm-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px;margin-bottom:8px;
+}
+.xrm-label{font-weight:800;font-size:13px;color:var(--text);}
+.xrm-label-wrap{flex:1;display:flex;flex-direction:column;gap:2px;}
+.xrm-hint{font-size:10px;color:var(--sub);font-weight:500;line-height:1.35;}
+.xrm-input{
+  width:78px;background:#101019;
+  border:1px solid var(--border-strong);border-radius:12px;
+  color:var(--text);font-weight:800;font-size:14px;
+  padding:10px 10px;text-align:center;
+  -webkit-appearance:none;
+}
+.xrm-input:focus{outline:none;border-color:var(--active);}
+.xrm-unit{font-size:11px;color:var(--sub);font-weight:700;}
+.save-xrm-btn{
+  width:100%;padding:16px;border-radius:16px;
+  border:none;background:var(--active);color:#fff;
+  font-weight:800;font-size:15px;cursor:pointer;
+  letter-spacing:.8px;text-transform:uppercase;margin-top:8px;
+  box-shadow:0 0 20px var(--active-glow);
+}
+.save-xrm-btn:active{opacity:.7;}
+.save-toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  background:var(--success);color:#fff;
+  border-radius:999px;padding:10px 20px;
+  font-weight:800;font-size:13px;z-index:400;
+  display:none;pointer-events:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+.save-toast.show{display:block;}
+
+.empty{text-align:center;padding:44px 20px;color:var(--sub);}
+.empty-icon{font-size:40px;margin-bottom:10px;}
+
+@media (max-width:420px){
+  .set-row{grid-template-columns:46px 1fr 1fr 84px;}
+  .badge{font-size:9px;padding:4px 8px;}
+  .ex-header{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="plan-switcher" id="planSwitcher">
+  <button class="plan-btn active-nico" id="btnNico" onclick="switchPlan('nico')">Nico</button>
+  <button class="plan-btn" id="btnJenni" onclick="switchPlan('jenni')">Jenni</button>
+</div>
+
+<div class="save-toast" id="toast">Gespeichert</div>
+
+<div class="plan-view active" id="planNico">
+  <div class="app-header">
+    <h1>Der Einzige Wahre Plan</h1>
+    <div class="subtitle">Nico · Powerlifting &amp; Hypertrophie</div>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="phase-tabs" id="nicoPhaseTabs"></div>
+  <div class="week-selector" id="nicoWeekSelector"></div>
+  <div class="day-tabs" id="nicoDayTabs"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="nicoProgress" style="width:0%"></div></div>
+    <div class="progress-text" id="nicoProgressText">0 / 0 Sätze geloggt</div>
+  </div>
+  <div class="exercise-list" id="nicoExList"></div>
+</div>
+
+<div class="plan-view" id="planJenni">
+  <div class="app-header">
+    <h1>Jennis Plan</h1>
+    <div class="subtitle">Jenni · Hypertrophie &amp; Kraft</div>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="phase-tabs" id="jenniPhaseTabs"></div>
+  <div class="week-selector" id="jenniWeekSelector"></div>
+  <div class="day-tabs" id="jenniDayTabs"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="jenniProgress" style="width:0%"></div></div>
+    <div class="progress-text" id="jenniProgressText">0 / 0 Sätze geloggt</div>
+  </div>
+  <div class="exercise-list" id="jenniExList"></div>
+</div>
+
+<button class="settings-btn" id="settingsBtn" onclick="openSettings()">⚙️</button>
+
+<div class="modal-overlay" id="xrmModal" onclick="closeOnOverlay(event)">
+  <div class="modal" id="xrmModalInner">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="xrmModalTitle">XRM Einstellungen</div>
+    <div class="modal-sub" id="xrmModalSub">Trage deine aktuellen Maximalwerte ein</div>
+    <div id="xrmFields"></div>
+    <button class="save-xrm-btn" onclick="saveXRM()">Speichern &amp; berechnen</button>
+  </div>
+</div>
+
+<div class="safe-bottom"></div>
+
+<script>
+const PLAN_KEY = {nico:'nico_', jenni:'jenni_'};
+const NICO_XRM_STORAGE_KEY = 'nico_xrm_v2';
+let currentPlan = 'nico';
+
+const NICO_PHASES = [
+  {id:'volume', label:'Volume', weeks:4},
+  {id:'intensity', label:'Intensity', weeks:4},
+  {id:'strength', label:'Strength', weeks:5},
+  {id:'deload1', label:'Deload 1', weeks:2},
+  {id:'deload2', label:'Deload 2', weeks:1},
+];
+
+const NICO_DAYS = {
+  volume:['Montag','Mittwoch','Freitag','Samstag'],
+  intensity:['Montag','Mittwoch','Freitag','Samstag'],
+  strength:['Montag','Mittwoch','Freitag','Samstag'],
+  deload1:['Sonntag','Dienstag','Donnerstag','Samstag'],
+  deload2:['Montag','Mittwoch','Freitag','Samstag'],
+};
+
+const NICO_EXCEL_CONFIG = {"volume":[{"day":"Montag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"volume_d0_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.8,0.8136,0.8272,0.75],"repss":["1","1","1","1"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Tempo Bench Back Down Set","base":85,"id":"volume_d0_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.8,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","3","3"],"notes":["","","",""]},{"name":"PL Row","base":70,"id":"volume_d0_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Incline DB Press","base":32,"id":"volume_d0_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Wide Grip Row","base":62.5,"id":"volume_d0_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Latzug","base":70,"id":"volume_d0_r5","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["14-18","14-18","14-18","14-18"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Bicep Curl","base":16,"id":"volume_d0_r6","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.8,0.85,0.9],"repss":["16-20","16-20","16-20","16-20"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Lateral Raises","base":16,"id":"volume_d0_r7","rests":["00:00:00","00:00:00","00:00:00","00:00:00"],"pcts":[0.75,0.8,0.85,0.9],"repss":["16-20","16-20","16-20","16-20"],"setss":["3","3","4","4"],"notes":["","","",""]}]},{"day":"Mittwoch","rows":[{"name":"Squat Top Set","base":120,"id":"volume_d1_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.8636,0.8,0.8908],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Squat Back down Set","base":100,"id":"volume_d1_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Close Grip Bench - Beine gestreckt","base":85,"id":"volume_d1_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.7,0.65,0.8,0.75],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","3","3"],"notes":["","","",""]},{"name":"Deadlift","base":140,"id":"volume_d1_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.85,0.8],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","3","3"],"notes":["","Last Set -> perfect set up;leg drive before putting butt down","",""]},{"name":"Weighted Pullups","base":15,"id":"volume_d1_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Calf Raise","base":110,"id":"volume_d1_r5","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","4","4"],"notes":["","","",""]}]},{"day":"Freitag","rows":[{"name":"Bench Top Set","base":120,"id":"volume_d2_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.8636,0.8,0.8908],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Bench Back Down Set","base":95,"id":"volume_d2_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Dumbell incline Bench Press","base":32,"id":"volume_d2_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Lat Pull Down eng","base":80,"id":"volume_d2_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Over Head Press","base":50,"id":"volume_d2_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Bicep Curl","base":18,"id":"volume_d2_r5","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["14-18","14-18","14-18","14-18"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Tricep Extension","base":30,"id":"volume_d2_r6","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.8,0.85,0.9],"repss":["16-20","16-20","16-20","16-20"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Lateral Raises","base":20,"id":"volume_d2_r7","rests":["00:00:00","00:00:00","00:00:00","00:00:00"],"pcts":[0.75,0.8,0.85,0.9],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","4","4"],"notes":["","","",""]}]},{"day":"Samstag","rows":[{"name":"Deadlift Top Set","base":160,"id":"volume_d3_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.8636,0.8,0.8908],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["Deload week 1","","",""]},{"name":"Deadlift Back down Set","base":140,"id":"volume_d3_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.65,0.9,0.75],"repss":["7-9","7-9","7-9","7-9"],"setss":["2","2","2","2"],"notes":["","Pause","","Pause"]},{"name":"Deficit Deadlift","base":120,"id":"volume_d3_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.65,0.7,0.75,0.8],"repss":["7-9","7-9","7-9","7-9"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Beinpresse","base":200,"id":"volume_d3_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-15","12-15","12-15","12-15"],"setss":["3","3","4","4"],"notes":["","","",""]},{"name":"Calf Raise","base":90,"id":"volume_d3_r4","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["14-18","14-18","14-18","14-18"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Latzug","base":100,"id":"volume_d3_r5","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["7-9","7-9","7-9","7-9"],"setss":["3","3","4","4"],"notes":["","","",""]}]}],"intensity":[{"day":"Montag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"intensity_d0_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.8544,0.8136,0.8816,0.8408],"repss":["1","1","1","1"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Tempo Bench Back Down Set","base":90,"id":"intensity_d0_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.7,0.75,0.8,0.85],"repss":["5-7","5-7","5-7","5-7"],"setss":["3","3","3","3"],"notes":["","","",""]},{"name":"PL Row","base":85,"id":"intensity_d0_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"incline DB Press","base":32,"id":"intensity_d0_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Wide Grip Row","base":70,"id":"intensity_d0_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Latzug","base":85,"id":"intensity_d0_r5","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["10-14","10-14","10-14","10-14"],"setss":["3","3","4","4"],"notes":["","","",""]},{"name":"Bicep Curl","base":18,"id":"intensity_d0_r6","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-16","12-16","12-16","12-16"],"setss":["2","2","3","3"],"notes":["","","",""]},{"name":"Lateral Raises","base":18,"id":"intensity_d0_r7","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.8,0.85,0.9],"repss":["10-14","10-14","10-14","10-14"],"setss":["2","2","4","4"],"notes":["","","",""]}]},{"day":"Mittwoch","rows":[{"name":"Squat Top Set","base":120,"id":"intensity_d1_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.918,0.8772,0.9452],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["","","Depth not good",""]},{"name":"Squat Back down Set","base":100,"id":"intensity_d1_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["5-7","5-7","5-7","5-7"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Larsen Press or Close Grip Bench","base":90,"id":"intensity_d1_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.7,0.65,0.8,0.75],"repss":["5-7","5-7","5-7","5-7"],"setss":["4","4","4","4"],"notes":["","","",""]},{"name":"Classic Deadlift","base":140,"id":"intensity_d1_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.85,0.8],"repss":["5-7","5-7","5-7","5-7"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Weighted Pullups","base":15,"id":"intensity_d1_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.85,0.8],"repss":["5-7","5-7","5-7","5-7"],"setss":["3","3","4","4"],"notes":["","","",""]},{"name":"Calfe Raises","base":120,"id":"intensity_d1_r5","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.85,0.8],"repss":["5-7","5-7","5-7","5-7"],"setss":["3","3","4","4"],"notes":["","","",""]}]},{"day":"Freitag","rows":[{"name":"Bench Top Set","base":120,"id":"intensity_d2_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.918,0.8772,0.9452],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Bench Back Down Set","base":100,"id":"intensity_d2_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.75,0.9,0.85],"repss":["5-7","5-7","5-7","5-7"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Incline DB Press","base":32,"id":"intensity_d2_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Lat Pull Down","base":90,"id":"intensity_d2_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2 (+DS)","2 (+DS)","2 (+DS)","2 (+DS)"],"notes":["","","",""]},{"name":"Over Head Press","base":55,"id":"intensity_d2_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["2","2","3","3"],"notes":["","","",""]},{"name":"Bicep Curl","base":35,"id":"intensity_d2_r5","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["10-14","10-14","10-14","10-14"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Tricep Extension","base":17.5,"id":"intensity_d2_r6","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.8,0.85,0.9],"repss":["12-16","12-16","12-16","12-16"],"setss":["3","3","4","4"],"notes":["","","",""]},{"name":"Seitheben","base":20,"id":"intensity_d2_r7","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.85,0.9,0.95,1],"repss":["10-14","10-14","10-14","10-14"],"setss":["3","3","4","4"],"notes":["","","",""]}]},{"day":"Samstag","rows":[{"name":"Deadlift Top Set","base":165,"id":"intensity_d3_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.918,0.8772,0.9452],"repss":["1-2","1-2","1-2","1-2"],"setss":["1","1","1","1"],"notes":["","","",""]},{"name":"Deadlift Back down Set","base":140,"id":"intensity_d3_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.8,0.65,0.9,0.75],"repss":["5-7","5-7","5-7","5-7"],"setss":["2","2","2","2"],"notes":["","Pause","","Pause"]},{"name":"Deficit Deadlift","base":130,"id":"intensity_d3_r2","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.65,0.7,0.75,0.8],"repss":["5-7","5-7","5-7","5-7"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Beinpresse","base":220,"id":"intensity_d3_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9],"repss":["8-12","8-12","8-12","8-12"],"setss":["3","3","4","4"],"notes":["","","",""]},{"name":"Calf Raise","base":100,"id":"intensity_d3_r4","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.9,0.95,1],"repss":["10-14","10-14","10-14","10-14"],"setss":["2","2","2","2"],"notes":["","","",""]},{"name":"Latzug","base":80,"id":"intensity_d3_r5","rests":["00:01:30","00:01:30","00:01:30","00:01:30"],"pcts":[0.75,0.9,0.95,1],"repss":["12-16","12-16","12-16","12-16"],"setss":["3","3","4","4"],"notes":["","","",""]}]}],"strength":[{"day":"Montag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"strength_d0_r0","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.8544,0.9224,0.8816,0.9496,0.9088],"repss":["1","1","1","1","1"],"setss":["1","1","1","1","1"],"notes":["","No tempo","","No tempo",""]},{"name":"Tempo Bench Back Down Set","base":95,"id":"strength_d0_r1","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.7,0.8,0.7,0.85],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["5","5","5","5","2-4"],"notes":["No tempo","","No tempo","","No tempo"]},{"name":"PL Row","base":60,"id":"strength_d0_r2","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["5-8","5-8","5-8","5-8","5-8"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Wide Grip Row","base":75,"id":"strength_d0_r3","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["5-8","5-8","5-8","5-8","5-8"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Latzug","base":40,"id":"strength_d0_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.85,0.9,0.95,1,1],"repss":["6-10","6-10","6-10","6-10","6-10"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Bicep Curl","base":38,"id":"strength_d0_r5","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["8-12","8-12","8-12","8-12","8-12"],"setss":["2","2","2","2","2"],"notes":["","","","",""]}]},{"day":"Mittwoch","rows":[{"name":"Squat Top Set","base":130,"id":"strength_d1_r0","rests":["00:05:00","00:05:00","00:05:00","00:05:00","00:05:00"],"pcts":[0.9588,0.918,0.986,0.9452,1],"repss":["1","1","1","1","1"],"setss":["1","1","1","1","1"],"notes":["","","","",""]},{"name":"Squat Back down Set","base":110,"id":"strength_d1_r1","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,0.75],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["4","4","4","2","2"],"notes":["","","","",""]},{"name":"Larsen Press or Close Grip Bench","base":95,"id":"strength_d1_r2","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.65,0.7,0.75,0.8,0.65],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Classic Deadlift","base":150,"id":"strength_d1_r3","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.7,0.75,0.8,0.85,0.7],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["2","2","2","2","2"],"notes":["","","","",""]}]},{"day":"Freitag","rows":[{"name":"Bench Top Set","base":120,"id":"strength_d2_r0","rests":["00:05:00","00:05:00","00:05:00","00:05:00","00:05:00"],"pcts":[0.9588,0.918,0.986,0.9452,1],"repss":["1","1","1","1","1"],"setss":["1","1","1","1","1"],"notes":["Palm/lat engagement","","","",""]},{"name":"Bench Back Down Set","base":105,"id":"strength_d2_r1","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,0.75],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["4","4","4","2","2"],"notes":["","","","",""]},{"name":"Dumbell Bench Press","base":38,"id":"strength_d2_r2","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["5-8","5-8","5-8","5-8","5-8"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Over Head Press","base":60,"id":"strength_d2_r3","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["5-8","5-8","5-8","5-8","5-8"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Bicep Curl","base":20,"id":"strength_d2_r4","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.85,0.9,0.95,1,1],"repss":["6-10","6-10","6-10","6-10","6-10"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Tricep Extension","base":20,"id":"strength_d2_r5","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["8-12","8-12","8-12","8-12","8-12"],"setss":["2","2","2","2","2"],"notes":["","","","",""]}]},{"day":"Samstag","rows":[{"name":"Deadlift Top Set","base":165,"id":"strength_d3_r0","rests":["00:05:00","00:05:00","00:05:00","00:05:00","00:05:00"],"pcts":[0.9588,0.918,0.986,0.9452,1],"repss":["1","1","1","1","1"],"setss":["1","1","1","1","1"],"notes":["Foot placement bar on shin an minimal hinge","","","",""]},{"name":"Deadlift Back down Set","base":150,"id":"strength_d3_r1","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.65,0.8,0.75,0.9,0.65],"repss":["3-5","3-5","3-5","3-5","3-5"],"setss":["4","4","4","2","2"],"notes":["Pause","","Pause","","Pause"]},{"name":"Beinpresse","base":240,"id":"strength_d3_r2","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.75,0.8,0.85,0.9,1],"repss":["5-8","5-8","5-8","5-8","5-8"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Calf Raise","base":100,"id":"strength_d3_r3","rests":["00:02:15","00:02:15","00:02:15","00:02:15","00:02:15"],"pcts":[0.85,0.9,0.95,1,1],"repss":["6-10","6-10","6-10","6-10","6-10"],"setss":["2","2","2","2","2"],"notes":["","","","",""]},{"name":"Plank","base":30,"id":"strength_d3_r4","rests":["00:03:00","00:03:00","00:03:00","00:03:00","00:03:00"],"pcts":[0.85,0.9,0.95,1,1],"repss":["8-12","8-12","8-12","8-12","8-12"],"setss":["2","2","2","2","2"],"notes":["","","","",""]}]}],"deload1":[{"day":"Sonntag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"deload1_d0_r0","rests":["00:03:00","00:03:00"],"pcts":[0.75,0.75],"repss":["1","1"],"setss":["1","1"],"notes":["",""]},{"name":"Tempo Bench Back Down Set","base":85,"id":"deload1_d0_r1","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["7-9","7-9"],"setss":["3","3"],"notes":["",""]},{"name":"PL Row","base":70,"id":"deload1_d0_r2","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Incline DB Press","base":32,"id":"deload1_d0_r3","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Wide Grip Row","base":62.5,"id":"deload1_d0_r4","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Latzug","base":70,"id":"deload1_d0_r5","rests":["00:00:45","00:00:45"],"pcts":[0.75,0.75],"repss":["14-18","14-18"],"setss":["2","2"],"notes":["",""]},{"name":"Bicep Curl","base":14,"id":"deload1_d0_r6","rests":["00:00:45","00:00:45"],"pcts":[0.65,0.65],"repss":["16-20","16-20"],"setss":["2","2"],"notes":["",""]}]},{"day":"Dienstag","rows":[{"name":"Pause Squat Top Set","base":110,"id":"deload1_d1_r0","rests":["00:03:00","00:03:00"],"pcts":[0.8,0.8],"repss":["1-3","1-3"],"setss":["1","1"],"notes":["",""]},{"name":"Squat Back down Set","base":95,"id":"deload1_d1_r1","rests":["00:01:30","00:01:30"],"pcts":[0.7,0.7],"repss":["7-9","7-9"],"setss":["2","2"],"notes":["",""]},{"name":"Close Grip Bench Beine gestreckt","base":85,"id":"deload1_d1_r2","rests":["00:01:30","00:01:30"],"pcts":[0.6,0.6],"repss":["7-9","7-9"],"setss":["3","3"],"notes":["",""]},{"name":"Classic Deadlift","base":140,"id":"deload1_d1_r3","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["7-9","7-9"],"setss":["3","3"],"notes":["",""]}]},{"day":"Donnerstag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"deload1_d2_r0","rests":["00:03:00","00:03:00"],"pcts":[0.8,0.8],"repss":["1-3","1-3"],"setss":["1","1"],"notes":["",""]},{"name":"Bench Back Down Set","base":95,"id":"deload1_d2_r1","rests":["00:01:30","00:01:30"],"pcts":[0.7,0.7],"repss":["7-9","7-9"],"setss":["2","2"],"notes":["",""]},{"name":"Dumbell incline Bench Press","base":32,"id":"deload1_d2_r2","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Lat Pull Down","base":80,"id":"deload1_d2_r3","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Over Head Press","base":50,"id":"deload1_d2_r4","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Bicep Curl","base":16,"id":"deload1_d2_r5","rests":["00:00:45","00:00:45"],"pcts":[0.75,0.75],"repss":["14-18","14-18"],"setss":["2","2"],"notes":["",""]},{"name":"Tricep Extension","base":16.25,"id":"deload1_d2_r6","rests":["00:00:45","00:00:45"],"pcts":[0.65,0.65],"repss":["16-20","16-20"],"setss":["2","2"],"notes":["",""]}]},{"day":"Samstag","rows":[{"name":"Deadlift Top Set","base":160,"id":"deload1_d3_r0","rests":["00:03:00","00:03:00"],"pcts":[0.8,0.8],"repss":["1-3","1-3"],"setss":["1","1"],"notes":["",""]},{"name":"Deadlift Back down Set","base":140,"id":"deload1_d3_r1","rests":["00:01:30","00:01:30"],"pcts":[0.7,0.7],"repss":["7-9","7-9"],"setss":["2","2"],"notes":["",""]},{"name":"Deficit Deadlift","base":120,"id":"deload1_d3_r2","rests":["00:01:30","00:01:30"],"pcts":[0.6,0.6],"repss":["7-9","7-9"],"setss":["2","2"],"notes":["",""]},{"name":"Beinpresse","base":200,"id":"deload1_d3_r3","rests":["00:01:30","00:01:30"],"pcts":[0.65,0.65],"repss":["12-15","12-15"],"setss":["2","2"],"notes":["",""]},{"name":"Calf Raise","base":80,"id":"deload1_d3_r4","rests":["00:00:45","00:00:45"],"pcts":[0.75,0.75],"repss":["14-18","14-18"],"setss":["2","2"],"notes":["",""]},{"name":"Plank","base":25,"id":"deload1_d3_r5","rests":["00:00:45","00:00:45"],"pcts":[0.75,0.75],"repss":["16-20","16-20"],"setss":["2","2"],"notes":["",""]}]}],"deload2":[{"day":"Montag","rows":[{"name":"Tempo Bench Top Set","base":110,"id":"deload2_d0_r0","rests":["00:03:00"],"pcts":[0.8],"repss":["1"],"setss":["1"],"notes":[""]},{"name":"Tempo Bench Back Down Set","base":85,"id":"deload2_d0_r1","rests":["00:02:15"],"pcts":[0.7],"repss":["3-5"],"setss":["5"],"notes":[""]},{"name":"PL Row","base":70,"id":"deload2_d0_r2","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Wide Grip Row","base":60,"id":"deload2_d0_r3","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Latzug","base":75,"id":"deload2_d0_r4","rests":["00:01:30"],"pcts":[0.85],"repss":["6-10"],"setss":["2"],"notes":[""]},{"name":"Bicep Curl","base":14,"id":"deload2_d0_r5","rests":["00:01:30"],"pcts":[0.75],"repss":["8-12"],"setss":["2"],"notes":[""]}]},{"day":"Mittwoch","rows":[{"name":"Squat Top Set","base":120,"id":"deload2_d1_r0","rests":["00:03:00"],"pcts":[0.85],"repss":["1-3"],"setss":["1"],"notes":[""]},{"name":"Pause Squat Back down Set","base":90,"id":"deload2_d1_r1","rests":["00:02:15"],"pcts":[0.75],"repss":["3-5"],"setss":["4"],"notes":[""]},{"name":"Close Grip Bench Beine gestreckt","base":85,"id":"deload2_d1_r2","rests":["00:02:15"],"pcts":[0.65],"repss":["3-5"],"setss":["2"],"notes":[""]},{"name":"RDL mit Pause unten","base":120,"id":"deload2_d1_r3","rests":["00:02:15"],"pcts":[0.7],"repss":["3-5"],"setss":["2"],"notes":[""]}]},{"day":"Freitag","rows":[{"name":"Bench Top Set","base":120,"id":"deload2_d2_r0","rests":["00:03:00"],"pcts":[0.85],"repss":["1-3"],"setss":["1"],"notes":[""]},{"name":"Tempo Bench Back Down Set","base":85,"id":"deload2_d2_r1","rests":["00:02:15"],"pcts":[0.75],"repss":["3-5"],"setss":["4"],"notes":[""]},{"name":"Dumbell incline Bench Press","base":28,"id":"deload2_d2_r2","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Lat Pull Down","base":72.5,"id":"deload2_d2_r3","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Over Head Press","base":45,"id":"deload2_d2_r4","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Bicep Curl","base":16,"id":"deload2_d2_r5","rests":["00:01:30"],"pcts":[0.85],"repss":["6-10"],"setss":["2"],"notes":[""]},{"name":"Tricep Extension","base":20,"id":"deload2_d2_r6","rests":["00:01:30"],"pcts":[0.75],"repss":["8-12"],"setss":["2"],"notes":[""]}]},{"day":"Samstag","rows":[{"name":"Deadlift Top Set","base":160,"id":"deload2_d3_r0","rests":["00:03:00"],"pcts":[0.85],"repss":["1-3"],"setss":["1"],"notes":[""]},{"name":"RDL mit Pause","base":140,"id":"deload2_d3_r1","rests":["00:02:15"],"pcts":[0.75],"repss":["3-5"],"setss":["4"],"notes":[""]},{"name":"Beinpresse","base":200,"id":"deload2_d3_r2","rests":["00:02:15"],"pcts":[0.75],"repss":["5-8"],"setss":["2"],"notes":[""]},{"name":"Calf Raise","base":80,"id":"deload2_d3_r3","rests":["00:01:30"],"pcts":[0.85],"repss":["6-10"],"setss":["2"],"notes":[""]},{"name":"Plank","base":25,"id":"deload2_d3_r4","rests":["00:01:30"],"pcts":[0.85],"repss":["8-12"],"setss":["2"],"notes":[""]}]}]};
+
+const JENNI_XRM_DEFS = [
+  {group:'Beine & Hüfte', items:[
+    {key:'beinpresse', label:'Beinpresse', hint:'12RM – Gewicht mit dem du 12 Wdh schaffst'},
+    {key:'rdl', label:'RDLs', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+    {key:'beinbeuger', label:'Beinbeuger', hint:'12RM – Gewicht mit dem du 12 Wdh schaffst'},
+    {key:'hipthrust', label:'Hip Thrust', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+    {key:'kickbacks', label:'Kickbacks', hint:'15RM – Gewicht mit dem du 15 Wdh schaffst'},
+  ]},
+  {group:'Rücken & Zug', items:[
+    {key:'latzug', label:'Latzug', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+    {key:'rudern', label:'Rudern', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+  ]},
+  {group:'Drücken', items:[
+    {key:'bankdruecken', label:'Bankdrücken', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+    {key:'incline', label:'Incline Press', hint:'10RM – Gewicht mit dem du 10 Wdh schaffst'},
+  ]},
+  {group:'Schulter & Arme', items:[
+    {key:'seitheben', label:'Seitheben', hint:'15RM – Gewicht mit dem du 15 Wdh schaffst'},
+    {key:'bizeps', label:'Bizeps Curl', hint:'12RM – Gewicht mit dem du 12 Wdh schaffst'},
+    {key:'trizeps', label:'Trizeps', hint:'12RM – Gewicht mit dem du 12 Wdh schaffst'},
+  ]},
+  {group:'Core', items:[
+    {key:'crunches', label:'Crunches', hint:'Zusatzgewicht das du verwenden kannst'},
+  ]},
+];
+
+const JENNI_XRM_DEFAULTS = {
+  beinpresse:80, rdl:40, beinbeuger:30, hipthrust:50, kickbacks:20,
+  latzug:40, rudern:35, bankdruecken:30, incline:20,
+  seitheben:8, bizeps:10, trizeps:12, crunches:5,
+};
+
+const JENNI_PHASES = [
+  {id:'volume', label:'Volume', weeks:4},
+  {id:'intensity', label:'Intensity', weeks:4},
+  {id:'strength', label:'Strength', weeks:5},
+  {id:'deload1', label:'Deload 1', weeks:2},
+  {id:'deload2', label:'Deload 2', weeks:1},
+];
+
+const JENNI_DAYS = {
+  volume:['Montag (Beine/Pull)','Freitag (OBK)','Samstag (Beine)'],
+  intensity:['Montag (Beine/Pull)','Freitag (OBK)','Samstag (Beine)'],
+  strength:['Montag (Beine/Pull)','Freitag (OBK)','Samstag (Beine)'],
+  deload1:['Montag (Beine/Pull)','Freitag (OBK)','Samstag (Beine)'],
+  deload2:['Montag (Beine/Pull)','Freitag (OBK)','Samstag (Beine)'],
+};
+
+const state = {
+  nico:{phase:'volume', week:1, day:0},
+  jenni:{phase:'volume', week:1, day:0},
+};
+
+function r25(v){ return Math.round((Number(v) || 0) / 2.5) * 2.5; }
+
+function formatKg(value){
+  const num = Number(value) || 0;
+  return Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '');
+}
+
+function formatRest(rest){
+  if(!rest) return '';
+  const value = String(rest);
+  if(/^\d{2}:\d{2}:\d{2}$/.test(value)){
+    const [hh,mm,ss] = value.split(':').map(Number);
+    return `${hh ? `${hh}:` : ''}${String(mm).padStart(hh ? 2 : 1,'0')}:${String(ss).padStart(2,'0')}`;
+  }
+  return value;
+}
+
+function parseSetCount(sets){
+  if(typeof sets === 'number') return sets;
+  const match = String(sets).match(/\d+/);
+  return match ? parseInt(match[0],10) : 1;
+}
+
+function getNicoDefaultXRM(){
+  const defaults = {};
+  Object.entries(NICO_EXCEL_CONFIG).forEach(([phaseId, days]) => {
+    days.forEach(day => day.rows.forEach(row => {
+      defaults[row.id] = row.base;
+    }));
+  });
+  return defaults;
+}
+
+function getNicoLegacyValue(oldData, row){
+  if(!oldData || typeof oldData !== 'object') return undefined;
+  const name = row.name.toLowerCase();
+
+  const checks = [
+    ['tempo_bench_back', /tempo bench back down/],
+    ['tempo_bench', /tempo bench top/],
+    ['bench_back', /bench back down/],
+    ['bench_top', /bench top/],
+    ['squat_back', /squat back down|pause squat back down/],
+    ['squat_top', /squat top|pause squat top/],
+    ['dl_back', /deadlift back down|classic deadlift/],
+    ['dl_top', /deadlift top/],
+    ['deficit_dl', /deficit deadlift/],
+    ['rdl', /rdl/],
+    ['cgb', /close grip bench/],
+    ['larsen', /larsen/],
+    ['incline_db', /incline db|dumbell incline|dumbell bench press|db bench press/],
+    ['lat_pulldown', /lat pull down/],
+    ['latzug', /^latzug$/],
+    ['pl_row', /pl row/],
+    ['wide_row', /wide grip row/],
+    ['weighted_pullup', /weighted pullups/],
+    ['ohp', /over head press/],
+    ['seitheben', /seitheben/],
+    ['lateral_raises', /lateral raises/],
+    ['bicep', /bicep curl/],
+    ['tricep', /tricep extension/],
+    ['beinpresse', /beinpresse/],
+    ['calf', /calf raise|calfe raises/],
+    ['plank', /plank/],
+  ];
+
+  for (const [legacyKey, pattern] of checks){
+    if(pattern.test(name) && oldData[legacyKey] != null) return oldData[legacyKey];
+  }
+  return undefined;
+}
+
+function getXRM(plan){
+  if(plan === 'nico'){
+    const defaults = getNicoDefaultXRM();
+    let stored = null;
+    try {
+      stored = JSON.parse(localStorage.getItem(NICO_XRM_STORAGE_KEY) || 'null');
+    } catch (e) {}
+
+    if(stored && typeof stored === 'object' && !Array.isArray(stored)){
+      return {...defaults, ...stored};
+    }
+
+    let legacy = null;
+    try {
+      legacy = JSON.parse(localStorage.getItem(PLAN_KEY.nico + 'xrm') || 'null');
+    } catch (e) {}
+
+    const migrated = {...defaults};
+    Object.values(NICO_EXCEL_CONFIG).forEach(days => {
+      days.forEach(day => day.rows.forEach(row => {
+        const legacyValue = getNicoLegacyValue(legacy, row);
+        if(legacyValue != null && !Number.isNaN(Number(legacyValue))) {
+          migrated[row.id] = Number(legacyValue);
+        }
+      }));
+    });
+    return migrated;
+  }
+
+  const stored = localStorage.getItem(PLAN_KEY[plan] + 'xrm');
+  if(stored){
+    try { return {...JENNI_XRM_DEFAULTS, ...JSON.parse(stored)}; } catch(e) {}
+  }
+  return {...JENNI_XRM_DEFAULTS};
+}
+
+function setXRM(plan, data){
+  if(plan === 'nico'){
+    localStorage.setItem(NICO_XRM_STORAGE_KEY, JSON.stringify(data));
+    return;
+  }
+  localStorage.setItem(PLAN_KEY[plan] + 'xrm', JSON.stringify(data));
+}
+
+function getLogKey(plan, phase, week, day, exIdx, setIdx){
+  return `${PLAN_KEY[plan]}log_${phase}_w${week}_d${day}_e${exIdx}_s${setIdx}`;
+}
+
+function getSetLog(plan, phase, week, day, exIdx, setIdx){
+  const v = localStorage.getItem(getLogKey(plan, phase, week, day, exIdx, setIdx));
+  if(v) try{ return JSON.parse(v); }catch(e){}
+  return null;
+}
+
+function setSetLog(plan, phase, week, day, exIdx, setIdx, data){
+  localStorage.setItem(getLogKey(plan, phase, week, day, exIdx, setIdx), JSON.stringify(data));
+}
+
+function getExerciseSetLogs(plan, phase, week, day, exIdx, sets){
+  const setCount = parseSetCount(sets);
+  return Array.from({length:setCount}, (_,i)=>getSetLog(plan, phase, week, day, exIdx, i));
+}
+
+function getCompletedSetCount(plan, phase, week, day, exIdx, sets){
+  return getExerciseSetLogs(plan, phase, week, day, exIdx, sets).filter(log=>log && log.done).length;
+}
+
+function getNicoRowsForPhaseDay(phase, day){
+  const phaseRows = NICO_EXCEL_CONFIG[phase] || [];
+  return (phaseRows[day] && phaseRows[day].rows) ? phaseRows[day].rows : [];
+}
+
+function buildNicoExercises(xrm, phase, week, day){
+  const weekIdx = Math.max(0, week - 1);
+  return getNicoRowsForPhaseDay(phase, day).map(row => ({
+    name: row.name,
+    xrmKey: row.id,
+    pct: row.pcts[Math.min(weekIdx, row.pcts.length - 1)] || 0,
+    reps: String(row.repss[Math.min(weekIdx, row.repss.length - 1)] || ''),
+    sets: row.setss[Math.min(weekIdx, row.setss.length - 1)] || '1',
+    rest: formatRest(row.rests[Math.min(weekIdx, row.rests.length - 1)] || ''),
+    note: row.notes[Math.min(weekIdx, row.notes.length - 1)] || '',
+    baseRef: row.base,
+  }));
+}
+
+function buildJenniExercises(xrm, phase, week, day){
+  const w1 = week - 1;
+  const exercises = [];
+  function pArr5(start,step){ return [start,start+step,start+2*step,start+3*step,start+4*step]; }
+  function pArr4(start,step){ return [start,start+step,start+2*step,start+3*step]; }
+  function getPct(arr){ return arr[Math.min(w1,arr.length-1)]; }
+
+  const phases = {
+    volume:{ main:pArr4(0.75,0.05), acc:pArr4(0.75,0.05), sets_main:[3,3,4,4], sets_acc:[3,3,4,4] },
+    intensity:{ main:pArr4(0.80,0.05), acc:pArr4(0.75,0.05), sets_main:[3,4,4,4], sets_acc:[3,3,4,4] },
+    strength:{ main:pArr5(0.85,0.03), acc:pArr5(0.75,0.03), sets_main:[3,3,4,4,3], sets_acc:[3,3,3,4,3] },
+    deload1:{ main:[0.65,0.65,0.65,0.65], acc:[0.60,0.60,0.60,0.60], sets_main:[3,3,3,3], sets_acc:[2,2,2,2] },
+    deload2:{ main:[0.70], acc:[0.65], sets_main:[3], sets_acc:[2] },
+  };
+
+  const cfg = phases[phase] || phases.volume;
+  const M = getPct(cfg.main);
+  const A = getPct(cfg.acc);
+  const SM = cfg.sets_main[Math.min(w1,cfg.sets_main.length-1)];
+  const SA = cfg.sets_acc[Math.min(w1,cfg.sets_acc.length-1)];
+
+  const repMain = {volume:'12-15',intensity:'8-12',strength:'5-8',deload1:'10-15',deload2:'10-12'};
+  const repAcc  = {volume:'15-20',intensity:'12-15',strength:'10-12',deload1:'12-15',deload2:'12-15'};
+  const restMain = {volume:'2:00',intensity:'2:30',strength:'3:00',deload1:'1:30',deload2:'1:30'};
+  const restAcc  = {volume:'1:30',intensity:'2:00',strength:'2:00',deload1:'1:00',deload2:'1:00'};
+
+  const RM = repMain[phase] || '12-15';
+  const RA = repAcc[phase] || '15-20';
+  const RESTM = restMain[phase] || '2:00';
+  const RESTA = restAcc[phase] || '1:30';
+
+  if(day===0){
+    exercises.push(...[
+      {name:'Beinpresse',xrmKey:'beinpresse',pct:M,reps:RM,sets:SM,rest:RESTM,note:'Hauptübung'},
+      {name:'RDLs',xrmKey:'rdl',pct:M,reps:RM,sets:SM,rest:RESTM,note:'Hüftbreite, neutraler Rücken'},
+      {name:'Beinbeuger',xrmKey:'beinbeuger',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Hip Thrust',xrmKey:'hipthrust',pct:M,reps:RM,sets:SM,rest:RESTM,note:'Gluteus Fokus'},
+      {name:'Latzug',xrmKey:'latzug',pct:M,reps:RM,sets:SM,rest:RESTM,note:''},
+      {name:'Rudern',xrmKey:'rudern',pct:M,reps:RM,sets:SM,rest:RESTM,note:''},
+      {name:'Crunches',xrmKey:'crunches',pct:A,reps:'15-20',sets:SA,rest:'1:00',note:''},
+    ]);
+  } else if(day===1){
+    exercises.push(...[
+      {name:'Bankdrücken',xrmKey:'bankdruecken',pct:M,reps:RM,sets:SM,rest:RESTM,note:'Hauptübung'},
+      {name:'Incline Press',xrmKey:'incline',pct:M,reps:RM,sets:SM,rest:RESTM,note:''},
+      {name:'Latzug',xrmKey:'latzug',pct:M,reps:RM,sets:SM,rest:RESTM,note:''},
+      {name:'Rudern',xrmKey:'rudern',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Seitheben',xrmKey:'seitheben',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Bizeps Curl',xrmKey:'bizeps',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Trizeps',xrmKey:'trizeps',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Crunches',xrmKey:'crunches',pct:A,reps:'15-20',sets:SA,rest:'1:00',note:''},
+    ]);
+  } else if(day===2){
+    exercises.push(...[
+      {name:'Beinpresse',xrmKey:'beinpresse',pct:M,reps:RM,sets:SM,rest:RESTM,note:'Variante: enger Stand'},
+      {name:'RDLs',xrmKey:'rdl',pct:M,reps:RM,sets:SM,rest:RESTM,note:''},
+      {name:'Hip Thrust',xrmKey:'hipthrust',pct:M+0.05,reps:RM,sets:SM,rest:RESTM,note:'Schwerer als Montag'},
+      {name:'Beinbeuger',xrmKey:'beinbeuger',pct:A,reps:RA,sets:SA,rest:RESTA,note:''},
+      {name:'Kickbacks',xrmKey:'kickbacks',pct:A,reps:RA,sets:SA,rest:RESTA,note:'Pro Seite'},
+      {name:'Crunches',xrmKey:'crunches',pct:A,reps:'15-20',sets:SA,rest:'1:00',note:''},
+    ]);
+  }
+
+  return exercises;
+}
+
+function switchPlan(plan){
+  currentPlan = plan;
+  document.getElementById('planNico').classList.toggle('active', plan==='nico');
+  document.getElementById('planJenni').classList.toggle('active', plan==='jenni');
+  document.getElementById('btnNico').className = 'plan-btn' + (plan==='nico' ? ' active-nico' : '');
+  document.getElementById('btnJenni').className = 'plan-btn' + (plan==='jenni' ? ' active-jenni' : '');
+  document.body.className = plan==='jenni' ? 'jenni-mode' : '';
+  renderPlan(plan);
+}
+
+function renderPlan(plan){
+  const phases = plan==='nico' ? NICO_PHASES : JENNI_PHASES;
+  const days = plan==='nico' ? NICO_DAYS : JENNI_DAYS;
+  const s = state[plan];
+
+  const phaseTabEl = document.getElementById(plan+'PhaseTabs');
+  phaseTabEl.innerHTML = phases.map(p => `<button class="phase-tab ${s.phase===p.id?'active':''}" onclick="selectPhase('${plan}','${p.id}')">${p.label}</button>`).join('');
+
+  const curPhase = phases.find(p => p.id===s.phase);
+  const numWeeks = curPhase ? curPhase.weeks : 4;
+  const weekEl = document.getElementById(plan+'WeekSelector');
+  weekEl.innerHTML = `<span class="week-label">Woche</span><div class="week-btns">${Array.from({length:numWeeks},(_,i)=>`<button class="week-btn ${s.week===i+1?'active':''}" onclick="selectWeek('${plan}',${i+1})">${i+1}</button>`).join('')}</div>`;
+
+  const dayNames = days[s.phase] || [];
+  if(s.day > dayNames.length - 1) s.day = 0;
+
+  const dayTabEl = document.getElementById(plan+'DayTabs');
+  dayTabEl.innerHTML = dayNames.map((d,i)=>`<button class="day-tab ${s.day===i?'active':''}" onclick="selectDay('${plan}',${i})">${d.split(' ')[0]}</button>`).join('');
+
+  renderExercises(plan);
+}
+
+function renderExercises(plan){
+  const s = state[plan];
+  const xrm = getXRM(plan);
+  const exList = document.getElementById(plan+'ExList');
+
+  const exercises = plan==='nico'
+    ? buildNicoExercises(xrm, s.phase, s.week, s.day)
+    : buildJenniExercises(xrm, s.phase, s.week, s.day);
+
+  if(!exercises.length){
+    exList.innerHTML = `<div class="empty"><div class="empty-icon">Training frei</div><div>Kein Training heute</div></div>`;
+    updateProgress(plan,0,0);
+    return;
+  }
+
+  const days = plan==='nico' ? NICO_DAYS : JENNI_DAYS;
+  const dayName = (days[s.phase] || [])[s.day] || '';
+  let html = `<div class="section-label">${dayName}</div>`;
+  let doneSets = 0;
+  let totalSets = 0;
+
+  exercises.forEach((ex,i) => {
+    const calcWeight = r25((Number(xrm[ex.xrmKey]) || 0) * ex.pct);
+    const setCount = parseSetCount(ex.sets);
+    const completedSets = getCompletedSetCount(plan, s.phase, s.week, s.day, i, ex.sets);
+    doneSets += completedSets;
+    totalSets += setCount;
+    const isLogged = completedSets === setCount;
+
+    html += `
+      <div class="ex-card ${isLogged?'logged':''}" id="excard_${plan}_${i}">
+        <div class="ex-header" onclick="toggleEx('${plan}',${i})">
+          <div class="ex-index">${String(i+1).padStart(2,'0')}</div>
+          <div class="ex-title">
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-meta">${ex.sets} Sätze × ${ex.reps} Wdh · ${ex.rest} Pause · ${completedSets}/${setCount} geloggt</div>
+          </div>
+          <div class="ex-badge">
+            <span class="badge badge-weight">${formatKg(calcWeight)} kg</span>
+            <span class="badge badge-pct">${Math.round(ex.pct*100)}%</span>
+          </div>
+        </div>
+        <div class="ex-body" id="exbody_${plan}_${i}">
+          <div class="info-grid">
+            <div class="info-cell"><div class="info-val">${formatKg(calcWeight)}</div><div class="info-key">kg</div></div>
+            <div class="info-cell"><div class="info-val">${ex.reps}</div><div class="info-key">Wdh</div></div>
+            <div class="info-cell"><div class="info-val">${setCount}</div><div class="info-key">Sätze</div></div>
+          </div>
+          ${ex.note ? `<div class="notes-badge">Hinweis: ${ex.note}</div>` : ''}
+          <div class="set-log-list">${renderSetInputs(plan, ex, i, calcWeight, s)}</div>
+        </div>
+      </div>`;
+  });
+
+  exList.innerHTML = html;
+  updateProgress(plan, doneSets, totalSets);
+}
+
+function renderSetInputs(plan, ex, exIdx, calcWeight, s){
+  const setCount = parseSetCount(ex.sets);
+  let html = '';
+  for(let setIdx=0; setIdx<setCount; setIdx++) {
+    const log = getSetLog(plan, s.phase, s.week, s.day, exIdx, setIdx);
+    html += `
+      <div class="set-row">
+        <div class="set-number">Satz ${setIdx+1}</div>
+        <div class="log-input-wrap">
+          <input class="log-input" type="number" inputmode="decimal" id="logKg_${plan}_${exIdx}_${setIdx}" placeholder="${formatKg(calcWeight)}" value="${log?log.kg:''}" step="0.5">
+          <div class="log-label">kg</div>
+        </div>
+        <div class="log-input-wrap">
+          <input class="log-input" type="number" inputmode="numeric" id="logReps_${plan}_${exIdx}_${setIdx}" placeholder="${String(ex.reps).split('-')[0]}" value="${log?log.reps:''}" step="1">
+          <div class="log-label">Wdh</div>
+        </div>
+        <button class="set-save-btn ${log&&log.done?'saved':''}" onclick="event.stopPropagation(); saveSetLog('${plan}',${exIdx},${setIdx})">${log&&log.done?'Gespeichert':'Speichern'}</button>
+      </div>`;
+  }
+  html += `<div class="exercise-actions"><button class="action-btn primary" onclick="markExerciseDone('${plan}',${exIdx})">Alle offenen Sätze speichern</button><button class="action-btn" onclick="clearExerciseLogs('${plan}',${exIdx})">Zurücksetzen</button></div>`;
+  return html;
+}
+
+function updateProgress(plan, done, total){
+  const pct = total ? (done/total)*100 : 0;
+  document.getElementById(plan+'Progress').style.width = pct + '%';
+  document.getElementById(plan+'ProgressText').textContent = `${done} / ${total} Sätze geloggt`;
+}
+
+function toggleEx(plan, idx){
+  const body = document.getElementById(`exbody_${plan}_${idx}`);
+  if(body) body.classList.toggle('open');
+}
+
+function saveSetLog(plan, exIdx, setIdx){
+  const s = state[plan];
+  const kg = document.getElementById(`logKg_${plan}_${exIdx}_${setIdx}`).value;
+  const reps = document.getElementById(`logReps_${plan}_${exIdx}_${setIdx}`).value;
+  setSetLog(plan, s.phase, s.week, s.day, exIdx, setIdx, {kg, reps, done:true});
+  renderExercises(plan);
+  const openBody = document.getElementById(`exbody_${plan}_${exIdx}`);
+  if(openBody) openBody.classList.add('open');
+  showToast('Satz gespeichert');
+}
+
+function markExerciseDone(plan, exIdx){
+  const s = state[plan];
+  const xrm = getXRM(plan);
+  const exercises = plan==='nico'
+    ? buildNicoExercises(xrm, s.phase, s.week, s.day)
+    : buildJenniExercises(xrm, s.phase, s.week, s.day);
+  const ex = exercises[exIdx];
+  if(!ex) return;
+  const setCount = parseSetCount(ex.sets);
+  const calcWeight = r25((Number(xrm[ex.xrmKey]) || 0) * ex.pct);
+
+  for(let setIdx=0; setIdx<setCount; setIdx++) {
+    const kgEl = document.getElementById(`logKg_${plan}_${exIdx}_${setIdx}`);
+    const repsEl = document.getElementById(`logReps_${plan}_${exIdx}_${setIdx}`);
+    const kg = kgEl && kgEl.value !== '' ? kgEl.value : formatKg(calcWeight);
+    const reps = repsEl ? repsEl.value : '';
+    setSetLog(plan, s.phase, s.week, s.day, exIdx, setIdx, {kg, reps, done:true});
+  }
+
+  renderExercises(plan);
+  const openBody = document.getElementById(`exbody_${plan}_${exIdx}`);
+  if(openBody) openBody.classList.add('open');
+  showToast('Übung gespeichert');
+}
+
+function clearExerciseLogs(plan, exIdx){
+  const s = state[plan];
+  const xrm = getXRM(plan);
+  const exercises = plan==='nico'
+    ? buildNicoExercises(xrm, s.phase, s.week, s.day)
+    : buildJenniExercises(xrm, s.phase, s.week, s.day);
+  const ex = exercises[exIdx];
+  if(!ex) return;
+
+  for(let setIdx=0; setIdx<parseSetCount(ex.sets); setIdx++) {
+    localStorage.removeItem(getLogKey(plan, s.phase, s.week, s.day, exIdx, setIdx));
+  }
+  renderExercises(plan);
+  const openBody = document.getElementById(`exbody_${plan}_${exIdx}`);
+  if(openBody) openBody.classList.add('open');
+  showToast('Logs gelöscht');
+}
+
+function selectPhase(plan, phaseId){
+  state[plan].phase = phaseId;
+  state[plan].week = 1;
+  state[plan].day = 0;
+  renderPlan(plan);
+}
+
+function selectWeek(plan, w){
+  state[plan].week = w;
+  renderPlan(plan);
+}
+
+function selectDay(plan, d){
+  state[plan].day = d;
+  renderExercises(plan);
+  const dayTabEl = document.getElementById(plan + 'DayTabs');
+  dayTabEl.querySelectorAll('.day-tab').forEach((el,i)=>el.classList.toggle('active', i===d));
+}
+
+function getNicoReferenceReps(row){
+  const raw = Array.isArray(row.repss) && row.repss.length ? String(row.repss[0] || '').trim() : '';
+  if(!raw) return 'bitte laut Excel eintragen';
+  if(/^\d+$/.test(raw)) return `${raw}RM`;
+  if(/^(\d+)-(\d+)$/.test(raw)) {
+    const m = raw.match(/^(\d+)-(\d+)$/);
+    return `${m[1]}-${m[2]} Wdh Referenzbereich`;
+  }
+  return `${raw} Referenzbereich`;
+}
+
+function buildNicoSettingsSections(phase, xrm){
+  const dayLabels = NICO_DAYS[phase] || [];
+  const phaseRows = NICO_EXCEL_CONFIG[phase] || [];
+  let html = '';
+  phaseRows.forEach((day, dayIdx) => {
+    html += `<div class="xrm-group"><div class="xrm-group-title">${dayLabels[dayIdx] || `Tag ${dayIdx+1}`}</div>`;
+    day.rows.forEach(row => {
+      const refReps = getNicoReferenceReps(row);
+      html += `
+        <div class="xrm-row">
+          <div class="xrm-label-wrap">
+            <span class="xrm-label">${row.name}</span>
+            <span class="xrm-hint">Referenzwert für ${refReps} · Excel-Standard: ${formatKg(row.base)} kg</span>
+          </div>
+          <input class="xrm-input" type="number" inputmode="decimal" id="xrmInp_${row.id}" value="${xrm[row.id] ?? row.base}" step="0.5" min="0">
+          <span class="xrm-unit">kg</span>
+        </div>`;
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function openSettings(){
+  const plan = currentPlan;
+  const xrm = getXRM(plan);
+
+  if(plan === 'nico'){
+    const phase = state.nico.phase;
+    const phaseLabel = (NICO_PHASES.find(p => p.id === phase) || {label:phase}).label;
+    document.getElementById('xrmModalTitle').textContent = `Nico – XRM Einstellungen (${phaseLabel})`;
+    document.getElementById('xrmModalSub').textContent = 'XRM bedeutet Estimated Rep Max. Für Nico werden die Referenzwerte phasen- und übungsabhängig wie im Excel gespeichert. Unter jeder Übung steht jetzt auch, für wie viele Wiederholungen der eingetragene Referenzwert gedacht ist.';
+    document.getElementById('xrmFields').innerHTML = buildNicoSettingsSections(phase, xrm);
+  } else {
+    document.getElementById('xrmModalTitle').textContent = 'Jenni – XRM Einstellungen';
+    document.getElementById('xrmModalSub').textContent = 'XRM bedeutet Estimated Rep Max. Das ist dein geschätztes Arbeitsgewicht für eine bestimmte Wiederholungszahl. Daraus berechnet die App automatisch dein Trainingsgewicht.';
+    let html = '';
+    JENNI_XRM_DEFS.forEach(group => {
+      html += `<div class="xrm-group"><div class="xrm-group-title">${group.group}</div>`;
+      group.items.forEach(item => {
+        html += `
+          <div class="xrm-row">
+            <div class="xrm-label-wrap">
+              <span class="xrm-label">${item.label}</span>
+              ${item.hint ? `<span class="xrm-hint">${item.hint}</span>` : ''}
+            </div>
+            <input class="xrm-input" type="number" inputmode="decimal" id="xrmInp_${item.key}" value="${xrm[item.key] || 0}" step="0.5" min="0">
+            <span class="xrm-unit">kg</span>
+          </div>`;
+      });
+      html += '</div>';
+    });
+    document.getElementById('xrmFields').innerHTML = html;
+  }
+
+  document.getElementById('xrmModal').classList.add('open');
+}
+
+function saveXRM(){
+  const plan = currentPlan;
+
+  if(plan === 'nico'){
+    const phase = state.nico.phase;
+    const existing = getXRM('nico');
+    const updated = {...existing};
+    (NICO_EXCEL_CONFIG[phase] || []).forEach(day => {
+      day.rows.forEach(row => {
+        const el = document.getElementById('xrmInp_' + row.id);
+        if(el) updated[row.id] = parseFloat(el.value) || 0;
+      });
+    });
+    setXRM('nico', updated);
+  } else {
+    const data = {};
+    JENNI_XRM_DEFS.forEach(g => g.items.forEach(item => {
+      const el = document.getElementById('xrmInp_' + item.key);
+      if(el) data[item.key] = parseFloat(el.value) || 0;
+    }));
+    setXRM('jenni', data);
+  }
+
+  document.getElementById('xrmModal').classList.remove('open');
+  renderExercises(plan);
+  showToast('XRM gespeichert');
+}
+
+function closeOnOverlay(e){
+  if(e.target === document.getElementById('xrmModal')){
+    document.getElementById('xrmModal').classList.remove('open');
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderPlan('nico');
+  renderPlan('jenni');
+});
+</script>
+</body>
+</html>
